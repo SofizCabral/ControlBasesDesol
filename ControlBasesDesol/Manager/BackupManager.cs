@@ -16,6 +16,36 @@ namespace ControlBasesDesol.Manager
             _backupService = new BackupService();
         }
 
+        public ResponseBase SaveBackupSchema(BackupSchemaModelRequest request)
+        {
+            var response = new ResponseBase();
+            var listSchema = new List<BackupSchemaModel>();
+            BackupSchemaModel model1 = new BackupSchemaModel();
+            try
+            {
+                model1.Instance = request.Instance;
+                model1.BD = request.Name;
+                model1.BackupFullFrecDays = request.BackupFullFrecDays;
+               // if (request.DailyBackupDif) { model1.DailyBackupDif = 1; } else { model1.DailyBackupDif = 0; };
+
+                listSchema.Add(model1);
+
+                foreach (var item in listSchema)
+                {
+                    _backupService.saveBackupSchema(item);
+                }
+
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message.ToString();
+            }
+
+            return response;
+        
+
+        }
         public ResponseBase SaveDiscSpace(BackupSpaceModelRequest request)
         {
             var response = new ResponseBase();
@@ -27,6 +57,8 @@ namespace ControlBasesDesol.Manager
 
             try
             {
+               // model1.PesoGbLog  = request.PesoGbLog;
+
                  model1 = new BackupSpaceModel()
                 {
                     Intance = request.Intance,

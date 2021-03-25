@@ -34,5 +34,20 @@ namespace ControlBasesDesol.Controllers
             }
         }
 
+        [Route("api/Backup/SaveBUSchema")]
+        public IHttpActionResult SaveBUSchema([FromBody] List<BackupSchemaModelRequest> request)
+        {
+            //ResponseBase result = _backupManager.SaveBackupSchema(request);
+
+            //if (result.Success)
+            //{
+                return Ok();
+            //}
+            //else
+            //{
+            //    return BadRequest(result.Message);
+            //}
+        }
+
     }
 }

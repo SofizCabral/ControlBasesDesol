@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Configuration;
 using System.Data;
-using System.Linq;
-using System.Web;
-using System.Web.Configuration;
 using ControlBasesDesol.Models;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace ControlBasesDesol.Repositories
 {
@@ -13,10 +9,11 @@ namespace ControlBasesDesol.Repositories
     {
         public void saveBackupSpace(BackupSpaceModel model)
         {
-           var cmdText = $@"INSERT INTO espaciobakups (Intance, PathBUFull, PathBUDif, PathBULog, PesoGbFull, PesoGbDif, PesoGbLog, Disco, EspacioTotalDisco, EspacioLibreDisco, FechaActualizacion) 
+           var cmdText = $@"delete from espaciobakups where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Disco=@Disco and Intance=@Intance;
+                            INSERT INTO espaciobakups (Intance, PathBUFull, PathBUDif, PathBULog, PesoGbFull, PesoGbDif, PesoGbLog, Disco, EspacioTotalDisco, EspacioLibreDisco, FechaActualizacion) 
                             VALUES (@Intance, @PathBUFull, @PathBUDif, @PathBULog, @PesoGbFull, @PesoGbDif, @PesoGbLog, @Disco, @EspacioTotalDisco, @EspacioLibreDisco, NOW());";
 
-            using (var conn = new MySqlConnection(WebConfigurationManager.AppSettings["connectionString"].ToString()))
+            using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
                 using (var cmd = new MySqlCommand(cmdText, conn))
                 {
@@ -40,5 +37,31 @@ namespace ControlBasesDesol.Repositories
                 }
             }
         }
+
+        public void saveBackupSchema(BackupSchemaModel model)
+        {
+            var cmdText = $@"delete FROM `controlbd`.`esquemasbackup` where Intance=@Instance;
+                             INSERT INTO `controlbd`.`esquemasbackup`(`Intance`,`BD`,`BackupFullFrecDays`,`DailyBackupDif`,`FechaActualización`)
+                             VALUES(@Instance,@BD,@BackupFullFrecDays,@DailyBackupDif,now()); ";
+            using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
+            {
+                using (var cmd = new MySqlCommand(cmdText, conn))
+                {
+                    if (conn.State == ConnectionState.Closed)
+                        conn.Open();
+
+                    cmd.CommandType = CommandType.Text;
+
+                    cmd.Parameters.AddWithValue("@Instance", model.Instance);
+                    cmd.Parameters.AddWithValue("@BD", model.BD);
+                    cmd.Parameters.AddWithValue("@BackupFullFrecDays", model.BackupFullFrecDays);
+                    cmd.Parameters.AddWithValue("@DailyBackupDif", model.DailyBackupDif);
+
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
     }
 }
