@@ -18,11 +18,11 @@ namespace ControlBasesDesol.Controllers
             _backupManager = new BackupManager();
         }
 
-        // PUT: api/Backup/5
+        [HttpPost]
         [Route("api/Backup/SaveDiscSpace")]
-        public IHttpActionResult SaveDiscSpace([FromBody]BackupSpaceModelRequest request)
+        public IHttpActionResult postDiscSpace([FromBody]BackupSpaceModelRequest request)
         {
-            ResponseBase result = _backupManager.SaveDiscSpace(request);
+            ResponseBase result = _backupManager.saveDiscSpace(request);
 
             if (result.Success)
             {
@@ -34,19 +34,36 @@ namespace ControlBasesDesol.Controllers
             }
         }
 
-        [Route("api/Backup/SaveBUSchema")]
-        public IHttpActionResult SaveBUSchema([FromBody] List<BackupSchemaModelRequest> request)
+        [HttpPost]
+        [Route("api/Backup/SaveSchema")]
+        public IHttpActionResult postSchema([FromBody] List<BackupSchemaModelRequest> request)
         {
-            //ResponseBase result = _backupManager.SaveBackupSchema(request);
+            ResponseBase result = _backupManager.saveBackupSchema(request);
 
-            //if (result.Success)
-            //{
+            if (result.Success)
+            {
                 return Ok();
-            //}
-            //else
-            //{
-            //    return BadRequest(result.Message);
-            //}
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
+        }
+
+        [HttpPost]
+        [Route("api/Backup/SaveLastBackups")]
+        public IHttpActionResult postLastBackups([FromBody] List<LastBackupsModelRequest> request)
+        {
+            ResponseBase result = _backupManager.saveLastBackup(request);
+
+            if (result.Success)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
         }
 
     }
