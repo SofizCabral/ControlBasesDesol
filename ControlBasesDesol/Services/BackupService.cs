@@ -15,8 +15,8 @@ namespace ControlBasesDesol.Services
                                  delete from espaciodiscos where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance;";
             var insertBackupQuery = $@"INSERT INTO espaciobakups (Instance, PathBUFull, PathBUDif, PathBULog, PesoGbFull, PesoGbDif, PesoGbLog, FechaActualizacion) 
                                         VALUES (@Instance, @PathBUFull, @PathBUDif, @PathBULog, @PesoGbFull, @PesoGbDif, @PesoGbLog, NOW());";
-            var insertDiscQuery = @"INSERT INTO espaciobakups (Instance, PathBUFull, PathBUDif, PathBULog, PesoGbFull, PesoGbDif, PesoGbLog, FechaActualizacion) 
-                                        VALUES (@Instance, @PathBUFull, @PathBUDif, @PathBULog, @PesoGbFull, @PesoGbDif, @PesoGbLog, NOW());";
+            var insertDiscQuery = @"INSERT INTO espaciodiscos (Instance, Disco, EspacioLibreGB, EspacioTotalGB, FechaActualizacion) 
+                                        VALUES (@Instance, @Disco, @EspacioTotalDisco, @EspacioLibreDisco, NOW());";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
@@ -28,11 +28,13 @@ namespace ControlBasesDesol.Services
                 try
                 {
                     // Delete 2 tables
+                    cmd.Parameters.Clear();
                     cmd.CommandText = deleteQuery;
                     cmd.Parameters.AddWithValue("@Instance", model.Instance);
                     cmd.ExecuteNonQuery();
 
                     // Insert table espaciobakups
+                    cmd.Parameters.Clear();
                     cmd.CommandText = insertBackupQuery;
                     cmd.Parameters.AddWithValue("@Instance", model.Instance);
                     cmd.Parameters.AddWithValue("@PathBUFull", model.PathBUFull);
@@ -46,6 +48,7 @@ namespace ControlBasesDesol.Services
                     // Insert each disc in espaciodiscos
                     foreach (var disc in model.Discos)
                     {
+                        cmd.Parameters.Clear();
                         cmd.CommandText = insertDiscQuery;
                         cmd.Parameters.AddWithValue("@Instance", model.Instance);
                         cmd.Parameters.AddWithValue("@Disco", disc.Letra);
@@ -57,9 +60,10 @@ namespace ControlBasesDesol.Services
                     // Save all changes
                     transaction.Commit();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
                     transaction.Rollback();
+                    throw ex;
                 }
                 finally
                 {
@@ -85,6 +89,7 @@ namespace ControlBasesDesol.Services
                 try
                 {
                     // Delete 
+                    cmd.Parameters.Clear();
                     cmd.CommandText = deleteQuery;
                     cmd.Parameters.AddWithValue("@Instance", ListModel.FirstOrDefault().Instance);
                     cmd.ExecuteNonQuery();
@@ -92,6 +97,7 @@ namespace ControlBasesDesol.Services
                     // Insert each model
                     foreach (var model in ListModel)
                     {
+                        cmd.Parameters.Clear();
                         cmd.CommandText = insertQuery;
                         cmd.Parameters.AddWithValue("@Instance", model.Instance);
                         cmd.Parameters.AddWithValue("@BD", model.BD);
@@ -103,9 +109,10 @@ namespace ControlBasesDesol.Services
                     // Save all changes
                     transaction.Commit();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
                     transaction.Rollback();
+                    throw ex;
                 }
                 finally
                 {
@@ -117,10 +124,10 @@ namespace ControlBasesDesol.Services
 
         public void saveLastBackup(List<LastBackupsModel> ListModel)
         {
-            var deleteQuery = @"DELETE FROM `ultimosbackups`
+            var deleteQuery = @"DELETE FROM ultimosbackups
                                 WHERE FechaBackup > date_format(date_sub(curdate(),interval 1 month),'%Y/%m/%d') and Instance=@Instance;";
-            var insertQuery = @"INSERT INTO ultimosbackups (Intance, `database`, FechaBackup, BackupSizeMB, BackupType, backupFile, RecoveryModel, IsCopyOnly, FechaActualizacion)
-                                        VALUES(@Intance, @Database, @FechaBackup, @BackupSizeMB, @BackupType, @BackupFile, @RecoveryModel, @IsCopyOnly, NOW()";
+            var insertQuery = @"INSERT INTO ultimosbackups (Instance, `database`, FechaBackup, BackupSizeMB, BackupType, backupFile, RecoveryModel, IsCopyOnly, FechaActualizacion)
+                                        VALUES(@Instance, @Database, @FechaBackup, @BackupSizeMB, @BackupType, @BackupFile, @RecoveryModel, @IsCopyOnly, NOW())";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
@@ -132,6 +139,7 @@ namespace ControlBasesDesol.Services
                 try
                 {
                     // Delete 
+                    cmd.Parameters.Clear();
                     cmd.CommandText = deleteQuery;
                     cmd.Parameters.AddWithValue("@Instance", ListModel.FirstOrDefault().Instance);
                     cmd.ExecuteNonQuery();
@@ -139,6 +147,7 @@ namespace ControlBasesDesol.Services
                     // Insert each model
                     foreach (var model in ListModel)
                     {
+                        cmd.Parameters.Clear();
                         cmd.CommandText = insertQuery;
                         cmd.Parameters.AddWithValue("@Instance", model.Instance);
                         cmd.Parameters.AddWithValue("@Database", model.Database);
@@ -154,9 +163,10 @@ namespace ControlBasesDesol.Services
                     // Save all changes
                     transaction.Commit();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
                     transaction.Rollback();
+                    throw ex;
                 }
                 finally
                 {

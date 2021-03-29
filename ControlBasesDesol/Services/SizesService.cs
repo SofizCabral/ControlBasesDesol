@@ -14,7 +14,7 @@ namespace ControlBasesDesol.Services
             var deleteQuery = @"DELETE FROM tamanobases
                                 WHERE fecha > date_format(date_sub(curdate(),interval 1 month),'%Y/%m/%d') and instance=@Instance;";
             var insertQuery = @"INSERT INTO tamanobases(instance, base, sizeMB, freespacemb, maxsize, growth, ispercentgrowth, LogicName, PhysicName, Type, fecha, FechaActualizacion)
-                                        VALUES (@Instance, @Base, @SizeMB, @Freespacemb, @Maxsize, @Growth, @Ispercentgrowth, @LogicName, @PhysicName, @Type, @Fecha, NOW()";
+                                        VALUES (@Instance, @Base, @SizeMB, @Freespacemb, @Maxsize, @Growth, @Ispercentgrowth, @LogicName, @PhysicName, @Type, @Fecha, NOW());";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
@@ -26,6 +26,7 @@ namespace ControlBasesDesol.Services
                 try
                 {
                     // Delete 
+                    cmd.Parameters.Clear();
                     cmd.CommandText = deleteQuery;
                     cmd.Parameters.AddWithValue("@Instance", listModel.FirstOrDefault().Instance);
                     cmd.ExecuteNonQuery();
@@ -33,6 +34,7 @@ namespace ControlBasesDesol.Services
                     // Insert each model
                     foreach (var model in listModel)
                     {
+                        cmd.Parameters.Clear();
                         cmd.CommandText = insertQuery;
                         cmd.Parameters.AddWithValue("@Instance", model.Instance);
                         cmd.Parameters.AddWithValue("@Base", model.Base);
@@ -51,9 +53,10 @@ namespace ControlBasesDesol.Services
                     // Save all changes
                     transaction.Commit();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
                     transaction.Rollback();
+                    throw ex;
                 }
                 finally
                 {
@@ -65,10 +68,10 @@ namespace ControlBasesDesol.Services
 
         public void saveTablesSizes(List<TablesSizesModel> listTables)
         {
-            var deleteQuery = @"DELETE FROM `ultimosbackups`
-                                WHERE FechaBackup > date_format(date_sub(curdate(),interval 1 month),'%Y/%m/%d') and Instance=@Instance;";
+            var deleteQuery = @"DELETE FROM `tamanotablas`
+                                WHERE fecha > date_format(date_sub(curdate(),interval 1 month),'%Y/%m/%d') and instance=@Instance;";
             var insertQuery = @"INSERT INTO tamanotablas(instance, base, nombre, filas, resevadokb, datoskb, indicekb, sinusokb, fecha, FechaActualizacion)
-                                    VALUES (@Instance, @Base, @Nombre, @Filas, @Resevadokb, @Datoskb, @Indicekb, @Sinusokb, @Fecha, NOW()";
+                                    VALUES (@Instance, @Base, @Nombre, @Filas, @Resevadokb, @Datoskb, @Indicekb, @Sinusokb, @Fecha, NOW());";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
@@ -80,6 +83,7 @@ namespace ControlBasesDesol.Services
                 try
                 {
                     // Delete 
+                    cmd.Parameters.Clear();
                     cmd.CommandText = deleteQuery;
                     cmd.Parameters.AddWithValue("@Instance", listTables.FirstOrDefault().Instance);
                     cmd.ExecuteNonQuery();
@@ -87,6 +91,7 @@ namespace ControlBasesDesol.Services
                     // Insert each model
                     foreach (var model in listTables)
                     {
+                        cmd.Parameters.Clear();
                         cmd.CommandText = insertQuery;
                         cmd.Parameters.AddWithValue("@Instance", model.Instance);
                         cmd.Parameters.AddWithValue("@Base", model.Base);
@@ -103,9 +108,10 @@ namespace ControlBasesDesol.Services
                     // Save all changes
                     transaction.Commit();
                 }
-                catch (System.Exception)
+                catch (System.Exception ex)
                 {
                     transaction.Rollback();
+                    throw ex;
                 }
                 finally
                 {
