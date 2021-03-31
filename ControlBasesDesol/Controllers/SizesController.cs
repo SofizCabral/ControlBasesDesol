@@ -22,6 +22,12 @@ namespace ControlBasesDesol.Controllers
         [Route("api/Backup/SaveSizesBase")]
         public IHttpActionResult postDiscSpace([FromBody]List<DatabaseSizesModelRequest> request)
         {
+            if (request == null)
+            {
+                Elmah.ErrorSignal.FromCurrentContext().Raise(new Exception("El request esta vacio."));
+                return BadRequest("El request esta vacio.");
+            }
+
             ResponseBase result = _sizesManager.saveSizesBase(request);
 
             if (result.Success)
@@ -38,6 +44,12 @@ namespace ControlBasesDesol.Controllers
         [Route("api/Backup/SaveSizeTable")]
         public IHttpActionResult postSchema([FromBody] List<TablesSizesModel> request)
         {
+            if (request == null)
+            {
+                Elmah.ErrorSignal.FromCurrentContext().Raise(new Exception("El request esta vacio."));
+                return BadRequest("El request esta vacio.");
+            }
+
             ResponseBase result = _sizesManager.saveSizesTable(request);
 
             if (result.Success)
