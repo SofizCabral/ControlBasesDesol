@@ -47,6 +47,7 @@ namespace ControlBasesDesol.Manager
             catch (Exception ex)
             {
                 response.Message = ex.Message.ToString();
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;
@@ -65,6 +66,7 @@ namespace ControlBasesDesol.Manager
             catch (Exception ex)
             {
                 response.Message = ex.Message.ToString();
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;

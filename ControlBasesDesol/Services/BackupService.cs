@@ -9,14 +9,11 @@ namespace ControlBasesDesol.Services
 {
     public class BackupService
     {
-        public void saveBackupSpace(BackupSpaceModelRequest model)
+        public void saveSpace(BackupSpaceModelRequest model)
         {
-            var deleteQuery = @"delete from espaciobakups where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance; 
-                                 delete from espaciodiscos where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance;";
+            var deleteQuery = @"delete from espaciobakups where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance;";
             var insertBackupQuery = $@"INSERT INTO espaciobakups (Instance, PathBUFull, PathBUDif, PathBULog, PesoGbFull, PesoGbDif, PesoGbLog, FechaActualizacion) 
                                         VALUES (@Instance, @PathBUFull, @PathBUDif, @PathBULog, @PesoGbFull, @PesoGbDif, @PesoGbLog, NOW());";
-            var insertDiscQuery = @"INSERT INTO espaciodiscos (Instance, Disco, EspacioLibreGB, EspacioTotalGB, FechaActualizacion) 
-                                        VALUES (@Instance, @Disco, @EspacioTotalDisco, @EspacioLibreDisco, NOW());";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
@@ -45,12 +42,49 @@ namespace ControlBasesDesol.Services
                     cmd.Parameters.AddWithValue("@PesoGbLog", model.PesoGbLog);
                     cmd.ExecuteNonQuery();
 
+                    // Save all changes
+                    transaction.Commit();
+                }
+                catch (System.Exception ex)
+                {
+                    transaction.Rollback();
+                    throw ex;
+                }
+                finally
+                {
+                    cmd.Dispose();
+                    transaction.Dispose();
+                }
+            }
+        }
+
+        public void saveDiscSpace(List<DiscModel> listModel)
+        {
+            var deleteQuery = @"delete from espaciodiscos where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance;";
+            var insertDiscQuery = @"INSERT INTO espaciodiscos (Instance, Disco, EspacioLibreGB, EspacioTotalGB, FechaActualizacion) 
+                                        VALUES (@Instance, @Disco, @EspacioTotalDisco, @EspacioLibreDisco, NOW());";
+
+            using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
+            {
+                if (conn.State == ConnectionState.Closed)
+                    conn.Open();
+                MySqlTransaction transaction = conn.BeginTransaction();
+                MySqlCommand cmd = conn.CreateCommand();
+                cmd.CommandType = CommandType.Text;
+                try
+                {
+                    // Delete 
+                    cmd.Parameters.Clear();
+                    cmd.CommandText = deleteQuery;
+                    cmd.Parameters.AddWithValue("@Instance", listModel.FirstOrDefault().Instance);
+                    cmd.ExecuteNonQuery();
+
                     // Insert each disc in espaciodiscos
-                    foreach (var disc in model.Discos)
+                    foreach (var disc in listModel)
                     {
                         cmd.Parameters.Clear();
                         cmd.CommandText = insertDiscQuery;
-                        cmd.Parameters.AddWithValue("@Instance", model.Instance);
+                        cmd.Parameters.AddWithValue("@Instance", disc.Instance);
                         cmd.Parameters.AddWithValue("@Disco", disc.Letra);
                         cmd.Parameters.AddWithValue("@EspacioTotalDisco", disc.TamañoGb);
                         cmd.Parameters.AddWithValue("@EspacioLibreDisco", disc.LibreGB);

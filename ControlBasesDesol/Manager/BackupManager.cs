@@ -16,18 +16,38 @@ namespace ControlBasesDesol.Manager
             _backupService = new BackupService();
         }
 
-        public ResponseBase saveDiscSpace(BackupSpaceModelRequest request)
+        public ResponseBase saveSpace(BackupSpaceModelRequest request)
         {
             var response = new ResponseBase();
             try
             {
-                _backupService.saveBackupSpace(request);
+                _backupService.saveSpace(request);
 
                 response.Success = true;
             }
             catch (Exception ex)
             {
                 response.Message = ex.Message.ToString();
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
+            }
+
+            return response;
+        }
+
+        public ResponseBase saveDiscSpace(List<DiscModel> request)
+        {
+            var response = new ResponseBase();
+            try
+            {
+                _backupService.saveDiscSpace(request);
+
+                response.Success = true;
+            }
+            catch (Exception ex)
+            {
+                response.Message = ex.Message.ToString();
+
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;
@@ -59,6 +79,7 @@ namespace ControlBasesDesol.Manager
             catch (Exception ex)
             {
                 response.Message = ex.Message.ToString();
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;
@@ -95,6 +116,7 @@ namespace ControlBasesDesol.Manager
             catch (Exception ex)
             {
                 response.Message = ex.Message.ToString();
+                Elmah.ErrorSignal.FromCurrentContext().Raise(ex);
             }
 
             return response;

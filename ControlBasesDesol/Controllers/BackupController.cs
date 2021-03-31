@@ -19,8 +19,24 @@ namespace ControlBasesDesol.Controllers
         }
 
         [HttpPost]
+        [Route("api/Backup/SaveSpace")]
+        public IHttpActionResult postSpace([FromBody]BackupSpaceModelRequest request)
+        {
+            ResponseBase result = _backupManager.saveSpace(request);
+
+            if (result.Success)
+            {
+                return Ok();
+            }
+            else
+            {
+                return BadRequest(result.Message);
+            }
+        }
+
+        [HttpPost]
         [Route("api/Backup/SaveDiscSpace")]
-        public IHttpActionResult postDiscSpace([FromBody]BackupSpaceModelRequest request)
+        public IHttpActionResult postDiscSpace([FromBody]List<DiscModel> request)
         {
             ResponseBase result = _backupManager.saveDiscSpace(request);
 
@@ -65,6 +81,8 @@ namespace ControlBasesDesol.Controllers
                 return BadRequest(result.Message);
             }
         }
+
+
 
     }
 }
