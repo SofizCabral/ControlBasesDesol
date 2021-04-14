@@ -62,7 +62,7 @@ namespace ControlBasesDesol.Services
         {
             var deleteQuery = @"delete from espaciodiscos where date_format(FechaActualizacion,'%Y/%m/%d')=curdate() and Instance=@Instance;";
             var insertDiscQuery = @"INSERT INTO espaciodiscos (Instance, Disco, EspacioLibreGB, EspacioTotalGB, FechaActualizacion) 
-                                        VALUES (@Instance, @Disco, @EspacioTotalDisco, @EspacioLibreDisco, NOW());";
+                                        VALUES (@Instance, @Disco, @EspacioLibreDisco, @EspacioTotalDisco, NOW());";
 
             using (var conn = new MySqlConnection(ConfigurationManager.ConnectionStrings["ApplicationServices"].ConnectionString.ToString()))
             {
